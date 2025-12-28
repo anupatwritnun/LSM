@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import liff from '@line/liff';
 
 const YesterdayHealthDiary = () => {
   const [weight, setWeight] = useState('65.0');
@@ -8,6 +9,32 @@ const YesterdayHealthDiary = () => {
   const [positiveHabits, setPositiveHabits] = useState([]);
   const [exerciseDuration, setExerciseDuration] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [displayName, setDisplayName] = useState('');
+  const [liffReady, setLiffReady] = useState(false);
+
+  // Initialize LIFF
+  useEffect(() => {
+    const initLiff = async () => {
+      try {
+        await liff.init({ liffId: '2008652706-R8VImhAe' });
+
+        if (liff.isLoggedIn()) {
+          const profile = await liff.getProfile();
+          setUserId(profile.userId);
+          setDisplayName(profile.displayName);
+        } else {
+          liff.login();
+        }
+        setLiffReady(true);
+      } catch (error) {
+        console.error('LIFF initialization failed:', error);
+        setLiffReady(true); // Set ready even on error to allow use outside LINE
+      }
+    };
+
+    initLiff();
+  }, []);
 
   const calculateBMI = () => {
     const weightKg = parseFloat(weight) || 0;
@@ -193,7 +220,10 @@ const YesterdayHealthDiary = () => {
       positiveHabits,
       exerciseDuration,
       bmi: calculateBMI(),
-      date: new Date().toISOString()
+      date: new Date().toISOString(),
+      userId: userId || 'anonymous', // Include LINE UserID
+      displayName: displayName || '',
+      liffReady: liffReady
     };
 
     try {
@@ -238,7 +268,9 @@ const YesterdayHealthDiary = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-slate-800 leading-tight">บันทึกสุขภาพ</h1>
-                <p className="text-sm text-slate-500">เมื่อวานคุณดูแลตัวเองยังไงบ้าง?</p>
+                <p className="text-sm text-slate-500">
+                  {displayName ? `สวัสดีคุณ${displayName} เมื่อวานคุณดูแลตัวเองยังไงบ้าง?` : 'เมื่อวานคุณดูแลตัวเองยังไงบ้าง?'}
+                </p>
               </div>
             </div>
             <button className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-all">
