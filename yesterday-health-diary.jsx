@@ -278,10 +278,11 @@ const YesterdayHealthDiary = () => {
 
       if (response.ok) {
         alert('บันทึกข้อมูลเรียบร้อยแล้ว! 🎉');
-        // Optional: Reset form after successful submission
-        // setRiskFactors([]);
-        // setPositiveHabits([]);
-        // setExerciseDuration(null);
+
+        // Close LIFF window and return to LINE OA
+        if (liff.isInClient()) {
+          liff.closeWindow();
+        }
       } else {
         alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
       }
