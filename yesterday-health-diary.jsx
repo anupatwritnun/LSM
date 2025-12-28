@@ -3,8 +3,8 @@ import { X } from 'lucide-react';
 import liff from '@line/liff';
 
 const YesterdayHealthDiary = () => {
-  const [weight, setWeight] = useState('65.0');
-  const [height, setHeight] = useState('170');
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
   const [riskFactors, setRiskFactors] = useState([]);
   const [positiveHabits, setPositiveHabits] = useState([]);
   const [exerciseDuration, setExerciseDuration] = useState(null);
