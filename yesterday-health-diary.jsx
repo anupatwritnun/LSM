@@ -7,6 +7,7 @@ const YesterdayHealthDiary = () => {
   const [riskFactors, setRiskFactors] = useState([]);
   const [positiveHabits, setPositiveHabits] = useState([]);
   const [exerciseDuration, setExerciseDuration] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const calculateBMI = () => {
     const weightKg = parseFloat(weight) || 0;
@@ -180,17 +181,45 @@ const YesterdayHealthDiary = () => {
     );
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     const data = {
       weight,
+      height,
       riskFactors,
       positiveHabits,
       exerciseDuration,
+      bmi: calculateBMI(),
       date: new Date().toISOString()
     };
-    console.log('Saving health diary:', data);
-    // TODO: Implement actual save logic
-    alert('บันทึกข้อมูลเรียบร้อยแล้ว! 🎉');
+
+    try {
+      const response = await fetch('https://n8n.srv1159869.hstgr.cloud/webhook-test/LSM', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        alert('บันทึกข้อมูลเรียบร้อยแล้ว! 🎉');
+        // Optional: Reset form after successful submission
+        // setRiskFactors([]);
+        // setPositiveHabits([]);
+        // setExerciseDuration(null);
+      } else {
+        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+      }
+    } catch (error) {
+      console.error('Error saving health diary:', error);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -424,12 +453,27 @@ const YesterdayHealthDiary = () => {
         <div className="max-w-2xl mx-auto">
           <button
             onClick={handleSave}
-            className="w-full py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] text-white text-2xl font-bold rounded-2xl shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3"
+            disabled={isSubmitting}
+            className={`w-full py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] text-white text-2xl font-bold rounded-2xl shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3 ${
+              isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+            }`}
           >
-            <span>บันทึกข้อมูล</span>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-            </svg>
+            {isSubmitting ? (
+              <>
+                <svg className="animate-spin h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>กำลังบันทึก...</span>
+              </>
+            ) : (
+              <>
+                <span>บันทึกข้อมูล</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+              </>
+            )}
           </button>
         </div>
       </footer>
