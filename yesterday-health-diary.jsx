@@ -197,7 +197,7 @@ const YesterdayHealthDiary = () => {
     };
 
     try {
-      const response = await fetch('https://n8n.srv1159869.hstgr.cloud/webhook-test/LSM', {
+      const response = await fetch('https://n8n.srv1159869.hstgr.cloud/webhook/LSM', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
