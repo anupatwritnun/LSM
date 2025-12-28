@@ -53,11 +53,16 @@ const YesterdayHealthDiary = () => {
         });
 
         if (response.ok) {
-          const data = await response.json();
-          if (data && data.weight) {
+          const result = await response.json();
+          console.log('Retrieved data:', result);
+
+          // Handle different response formats
+          const data = result.data || result;
+
+          if (data && data.weight !== undefined) {
             setWeight(data.weight.toString());
           }
-          if (data && data.height) {
+          if (data && data.height !== undefined) {
             setHeight(data.height.toString());
           }
         }
