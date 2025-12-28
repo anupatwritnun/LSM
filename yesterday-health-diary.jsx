@@ -12,6 +12,7 @@ const YesterdayHealthDiary = () => {
   const [userId, setUserId] = useState(null);
   const [displayName, setDisplayName] = useState('');
   const [liffReady, setLiffReady] = useState(false);
+  const [isLoadingData, setIsLoadingData] = useState(false);
 
   // Initialize LIFF
   useEffect(() => {
@@ -35,6 +36,41 @@ const YesterdayHealthDiary = () => {
 
     initLiff();
   }, []);
+
+  // Retrieve user's last data after LIFF is ready
+  useEffect(() => {
+    const retrieveLastData = async () => {
+      if (!userId || !liffReady) return;
+
+      setIsLoadingData(true);
+      try {
+        const response = await fetch('https://n8n.srv1159869.hstgr.cloud/webhook/LSM_retrieve', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.weight) {
+            setWeight(data.weight.toString());
+          }
+          if (data && data.height) {
+            setHeight(data.height.toString());
+          }
+        }
+      } catch (error) {
+        console.error('Error retrieving last data:', error);
+        // Don't show alert, just use defaults
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    retrieveLastData();
+  }, [userId, liffReady]);
 
   const calculateBMI = () => {
     const weightKg = parseFloat(weight) || 0;
