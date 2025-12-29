@@ -350,18 +350,18 @@ const YesterdayHealthDiary = () => {
           </div>
         </section>
 
-        {/* Quick Stats - Weight & Height */}
-        <section className="grid grid-cols-2 gap-4">
-          {/* Weight Card */}
-          <div className="bg-white rounded-3xl p-4 shadow-lg border border-slate-100">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-base font-semibold text-slate-700">น้ำหนัก</p>
+        {/* Weight & Height */}
+        <section className="space-y-4">
+          {/* Weight Card - Always shown */}
+          <div className="bg-white rounded-3xl p-5 shadow-lg border border-slate-100">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-lg font-semibold text-slate-700">น้ำหนัก</p>
               <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">กก.</span>
             </div>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-3">
               <button
                 onClick={() => adjustWeight(-0.5)}
-                className="w-11 h-11 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xl font-semibold transition-all flex items-center justify-center"
+                className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
               >
                 −
               </button>
@@ -371,32 +371,66 @@ const YesterdayHealthDiary = () => {
                   inputMode="decimal"
                   value={weight}
                   onChange={(e) => handleWeightChange(e.target.value)}
-                  className="w-full text-center text-3xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
+                  className="w-full text-center text-4xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
                   placeholder="0.0"
                 />
               </div>
               <button
                 onClick={() => adjustWeight(0.5)}
-                className="w-11 h-11 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xl font-semibold transition-all flex items-center justify-center"
+                className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
               >
                 +
               </button>
             </div>
           </div>
 
-          {/* Height Card - Collapsible */}
-          <details className="bg-white rounded-3xl shadow-lg border border-slate-100 group">
-            <summary className="p-4 cursor-pointer hover:bg-slate-50 rounded-3xl transition-colors">
-              <div className="flex items-center justify-between">
-                <p className="text-base font-semibold text-slate-700">ส่วนสูง</p>
+          {/* Height Card - Collapsible for returning users, normal for new users */}
+          {height ? (
+            <details className="bg-white rounded-3xl shadow-lg border border-slate-100 group">
+              <summary className="p-4 cursor-pointer hover:bg-slate-50 rounded-3xl transition-colors">
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-semibold text-slate-700">ส่วนสูง</p>
+                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">ซม.</span>
+                </div>
+              </summary>
+              <div className="px-4 pb-4">
+                <div className="flex items-center justify-center gap-3 pt-2">
+                  <button
+                    onClick={() => adjustHeight(-1)}
+                    className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
+                  >
+                    −
+                  </button>
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      value={height}
+                      onChange={(e) => handleHeightChange(e.target.value)}
+                      className="w-full text-center text-4xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
+                      placeholder="0"
+                      maxLength={3}
+                    />
+                  </div>
+                  <button
+                    onClick={() => adjustHeight(1)}
+                    className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+            </details>
+          ) : (
+            <div className="bg-white rounded-3xl p-5 shadow-lg border border-slate-100">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-lg font-semibold text-slate-700">ส่วนสูง</p>
                 <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">ซม.</span>
               </div>
-            </summary>
-            <div className="px-4 pb-4">
-              <div className="flex items-center justify-center gap-2 pt-2">
+              <div className="flex items-center justify-center gap-3">
                 <button
                   onClick={() => adjustHeight(-1)}
-                  className="w-11 h-11 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xl font-semibold transition-all flex items-center justify-center"
+                  className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
                 >
                   −
                 </button>
@@ -406,20 +440,20 @@ const YesterdayHealthDiary = () => {
                     inputMode="numeric"
                     value={height}
                     onChange={(e) => handleHeightChange(e.target.value)}
-                    className="w-full text-center text-3xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
+                    className="w-full text-center text-4xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
                     placeholder="0"
                     maxLength={3}
                   />
                 </div>
                 <button
                   onClick={() => adjustHeight(1)}
-                  className="w-11 h-11 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-xl text-xl font-semibold transition-all flex items-center justify-center"
+                  className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
                 >
                   +
                 </button>
               </div>
             </div>
-          </details>
+          )}
         </section>
 
         {/* Health Habits */}
