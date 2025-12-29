@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
 import liff from '@line/liff';
 
 const YesterdayHealthDiary = () => {
@@ -296,32 +295,6 @@ const YesterdayHealthDiary = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/30 pb-40">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-orange-100 shadow-sm">
-        <div className="max-w-2xl mx-auto p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 p-0.5 shadow-lg">
-                <img
-                  src="/Nurse.png"
-                  alt="ปลาท๊องง"
-                  className="w-full h-full rounded-full bg-white p-0.5"
-                />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-slate-800 leading-tight">บันทึกสุขภาพ</h1>
-                <p className="text-sm text-slate-500">
-                  {displayName ? `สวัสดีคุณ${displayName} เมื่อวานคุณดูแลตัวเองยังไงบ้าง?` : 'เมื่อวานคุณดูแลตัวเองยังไงบ้าง?'}
-                </p>
-              </div>
-            </div>
-            <button className="p-2.5 bg-slate-100 hover:bg-slate-200 rounded-full transition-all">
-              <X size={24} strokeWidth={2.5} className="text-slate-600" />
-            </button>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-2xl mx-auto p-4 space-y-4">
         {/* BMI Hero Card */}
         <section className={`bg-gradient-to-br ${getBMIColor().bg} rounded-3xl p-5 shadow-xl border-2 ${getBMIColor().border} relative overflow-hidden`}>
