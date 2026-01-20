@@ -9,6 +9,7 @@ const YesterdayHealthDiary = () => {
   const [exerciseDuration, setExerciseDuration] = useState(null);
   const [symptoms, setSymptoms] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [userId, setUserId] = useState(null);
   const [displayName, setDisplayName] = useState('');
   const [liffReady, setLiffReady] = useState(false);
@@ -288,19 +289,26 @@ const YesterdayHealthDiary = () => {
       });
 
       if (response.ok) {
-        alert('บันทึกข้อมูลเรียบร้อยแล้ว! 🎉');
+        // Show success overlay
+        setShowSuccess(true);
 
-        // Close LIFF window and return to LINE OA
-        if (liff.isInClient()) {
-          liff.closeWindow();
-        }
+        // Auto-close after 2 seconds
+        setTimeout(() => {
+          if (liff.isInClient()) {
+            liff.closeWindow();
+          } else {
+            // For testing outside LINE, hide success after delay
+            setShowSuccess(false);
+            setIsSubmitting(false);
+          }
+        }, 2000);
       } else {
         alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง');
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error('Error saving health diary:', error);
       alert('เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาตรวจสอบอินเทอร์เน็ตและลองใหม่');
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -323,6 +331,47 @@ const YesterdayHealthDiary = () => {
       <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z" />
     </svg>
   );
+
+  // Success Overlay Component
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-400 to-emerald-500 flex flex-col items-center justify-center p-8">
+        <div className="bg-white rounded-3xl p-8 shadow-2xl max-w-sm w-full text-center">
+          {/* Success Icon */}
+          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
+            <svg className="w-14 h-14 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+
+          {/* Mascot */}
+          <div className="w-20 h-20 mx-auto mb-4">
+            <img
+              src="/Nurse.png"
+              alt="หมอปลาทอง"
+              className="w-full h-full object-contain"
+              onError={(e) => {
+                e.target.style.display = 'none';
+              }}
+            />
+          </div>
+
+          {/* Success Message */}
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">บันทึกเรียบร้อย! 🎉</h2>
+          <p className="text-gray-500 mb-4">ขอบคุณที่บันทึกข้อมูลสุขภาพ</p>
+
+          {/* Auto-close indicator */}
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>กำลังปิดหน้าต่าง...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -648,8 +697,8 @@ const YesterdayHealthDiary = () => {
                       key={option.id}
                       onClick={() => toggleSymptom(option.id)}
                       className={`w-full p-4 rounded-xl text-left transition-all border-2 ${isSelected
-                          ? 'bg-red-500 border-red-500 text-white shadow-md'
-                          : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
+                        ? 'bg-red-500 border-red-500 text-white shadow-md'
+                        : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
                         }`}
                     >
                       <div className="flex items-start gap-3">
