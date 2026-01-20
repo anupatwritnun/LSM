@@ -7,11 +7,18 @@ const YesterdayHealthDiary = () => {
   const [riskFactors, setRiskFactors] = useState([]);
   const [positiveHabits, setPositiveHabits] = useState([]);
   const [exerciseDuration, setExerciseDuration] = useState(null);
+  const [symptoms, setSymptoms] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userId, setUserId] = useState(null);
   const [displayName, setDisplayName] = useState('');
   const [liffReady, setLiffReady] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    body: true,
+    habits: false,
+    exercise: false,
+    symptoms: false
+  });
 
   // Initialize LIFF
   useEffect(() => {
@@ -91,42 +98,42 @@ const YesterdayHealthDiary = () => {
     const bmi = parseFloat(calculateBMI());
     if (isNaN(bmi)) {
       return {
-        bg: 'from-gray-100 to-gray-200',
-        border: 'border-gray-300',
-        text: 'text-gray-500'
+        bg: 'bg-gray-50',
+        text: 'text-gray-500',
+        badge: 'bg-gray-100 text-gray-600'
       };
     }
 
     // BMI categories for Asian population
     if (bmi < 18.5) {
       return {
-        bg: 'from-blue-100 to-blue-200',
-        border: 'border-blue-300',
-        text: 'text-blue-600'
+        bg: 'bg-blue-50',
+        text: 'text-blue-600',
+        badge: 'bg-blue-100 text-blue-600'
       }; // Underweight
     } else if (bmi < 23) {
       return {
-        bg: 'from-green-100 to-green-200',
-        border: 'border-green-300',
-        text: 'text-green-600'
+        bg: 'bg-green-50',
+        text: 'text-green-600',
+        badge: 'bg-green-100 text-green-600'
       }; // Normal
     } else if (bmi < 25) {
       return {
-        bg: 'from-yellow-100 to-yellow-200',
-        border: 'border-yellow-300',
-        text: 'text-yellow-600'
+        bg: 'bg-yellow-50',
+        text: 'text-yellow-600',
+        badge: 'bg-yellow-100 text-yellow-600'
       }; // Overweight
     } else if (bmi < 30) {
       return {
-        bg: 'from-orange-100 to-orange-200',
-        border: 'border-orange-300',
-        text: 'text-orange-600'
+        bg: 'bg-orange-50',
+        text: 'text-orange-600',
+        badge: 'bg-orange-100 text-orange-600'
       }; // Obese I
     } else {
       return {
-        bg: 'from-red-200 to-red-300',
-        border: 'border-red-400',
-        text: 'text-red-700'
+        bg: 'bg-red-50',
+        text: 'text-red-600',
+        badge: 'bg-red-100 text-red-700'
       }; // Obese II
     }
   };
@@ -135,11 +142,11 @@ const YesterdayHealthDiary = () => {
     const bmi = parseFloat(calculateBMI());
     if (isNaN(bmi)) return '';
 
-    if (bmi < 18.5) return 'น้ำหนักน้อย/ผอม';
-    if (bmi < 23) return 'ปกติ (สมส่วน)';
+    if (bmi < 18.5) return 'ผอม';
+    if (bmi < 23) return 'ปกติ';
     if (bmi < 25) return 'น้ำหนักเกิน';
-    if (bmi < 30) return 'โรคอ้วนระดับ 1';
-    return 'โรคอ้วนระดับ 2';
+    if (bmi < 30) return 'อ้วน';
+    return 'อ้วนมาก';
   };
 
   const getBMITip = () => {
@@ -166,17 +173,6 @@ const YesterdayHealthDiary = () => {
     }
   };
 
-  const getBMIEmoji = () => {
-    const bmi = parseFloat(calculateBMI());
-    if (isNaN(bmi)) return '😊';
-
-    if (bmi < 18.5) return '😊';
-    if (bmi < 23) return '💪';
-    if (bmi < 25) return '🙂';
-    if (bmi < 30) return '😰';
-    return '😟';
-  };
-
   const handleWeightChange = (value) => {
     // Allow only numbers and one decimal point
     const cleaned = value.replace(/[^\d.]/g, '');
@@ -192,24 +188,12 @@ const YesterdayHealthDiary = () => {
     setWeight(formatted || '');
   };
 
-  const adjustWeight = (delta) => {
-    const current = parseFloat(weight) || 0;
-    const newWeight = Math.max(0, current + delta);
-    setWeight(newWeight.toFixed(1));
-  };
-
   const handleHeightChange = (value) => {
     // Allow only numbers
     const cleaned = value.replace(/[^\d]/g, '');
     if (cleaned.length <= 3) {
       setHeight(cleaned || '');
     }
-  };
-
-  const adjustHeight = (delta) => {
-    const current = parseInt(height) || 0;
-    const newHeight = Math.max(0, Math.min(300, current + delta));
-    setHeight(newHeight.toString());
   };
 
   const riskOptions = [
@@ -224,6 +208,18 @@ const YesterdayHealthDiary = () => {
   const positiveOptions = [
     { id: 'meditation', icon: '🧘', label: 'นั่งสมาธิ', description: '' },
     { id: 'vegetables', icon: '🥗', label: 'ทานผักเยอะ', description: 'เน้นทานผัก ผลไม้ ธัญพืช หรือถั่วต่างๆ' },
+  ];
+
+  const symptomOptions = [
+    { id: 'headache', icon: '🤕', label: 'ปวดศีรษะ', description: '' },
+    { id: 'dizziness', icon: '😵', label: 'วิงเวียน หน้ามืด', description: '' },
+    { id: 'fatigue', icon: '😩', label: 'อ่อนเพลีย เหนื่อยง่าย', description: '' },
+    { id: 'blurredVision', icon: '👁️', label: 'ตาพร่ามัว', description: '' },
+    { id: 'nosebleed', icon: '🩸', label: 'เลือดกำเดาไหล', description: '' },
+    { id: 'chestPain', icon: '💔', label: 'เจ็บหน้าอก', description: '' },
+    { id: 'breathlessness', icon: '😮‍💨', label: 'หายใจเหนื่อย', description: '' },
+    { id: 'weakLimbs', icon: '🦵', label: 'แขนขาอ่อนแรง', description: '' },
+    { id: 'swelling', icon: '🫧', label: 'ตัวบวม', description: '' },
   ];
 
   const toggleRiskFactor = (id) => {
@@ -248,6 +244,21 @@ const YesterdayHealthDiary = () => {
     );
   };
 
+  const toggleSymptom = (id) => {
+    setSymptoms(prev =>
+      prev.includes(id)
+        ? prev.filter(item => item !== id)
+        : [...prev, id]
+    );
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   const handleSave = async () => {
     if (isSubmitting) return;
 
@@ -259,6 +270,7 @@ const YesterdayHealthDiary = () => {
       riskFactors,
       positiveHabits,
       exerciseDuration,
+      symptoms,
       bmi: calculateBMI(),
       date: new Date().toISOString(),
       userId: userId || 'anonymous', // Include LINE UserID
@@ -293,251 +305,386 @@ const YesterdayHealthDiary = () => {
     }
   };
 
+  // Chevron Icon Component
+  const ChevronIcon = ({ expanded }) => (
+    <svg
+      className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  );
+
+  // Pin Icon Component
+  const PinIcon = () => (
+    <svg className="w-4 h-4 text-rose-500" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z" />
+    </svg>
+  );
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-amber-50/30 pb-40">
-      <main className="max-w-2xl mx-auto p-4 space-y-4">
-        {/* BMI Hero Card */}
-        <section className={`bg-gradient-to-br ${getBMIColor().bg} rounded-3xl p-5 shadow-xl border-2 ${getBMIColor().border} relative overflow-hidden`}>
-          <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12 blur-2xl"></div>
-          <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full -ml-10 -mb-10 blur-xl"></div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Orange Gradient Header */}
+      <header className="bg-gradient-to-r from-orange-400 to-orange-500 pt-8 pb-16 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-400/90 to-orange-600/90"></div>
+        <div className="relative z-10 max-w-lg mx-auto text-center">
+          <h1 className="text-2xl font-bold text-white mb-2">บันทึกสุขภาพประจำวัน</h1>
+          {displayName && (
+            <p className="text-orange-100 text-sm">สวัสดี {displayName} 👋</p>
+          )}
+        </div>
+      </header>
 
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <p className="text-base font-semibold text-slate-700 mb-1">ดัชนีมวลกาย (BMI)</p>
-                <p className={`text-5xl font-bold ${getBMIColor().text} tracking-tight`}>
-                  {calculateBMI()}
-                </p>
+      {/* Mascot */}
+      <div className="relative z-20 -mt-12 mb-4 flex justify-center">
+        <div className="w-24 h-24 bg-white rounded-full shadow-lg flex items-center justify-center overflow-hidden border-4 border-white">
+          <img
+            src="/Nurse.png"
+            alt="หมอปลาทอง"
+            className="w-20 h-20 object-contain"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.innerHTML = '<span class="text-4xl">🐟</span>';
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <main className="max-w-lg mx-auto px-4 pb-32 space-y-4 -mt-2">
+
+        {/* Body Measurements Section */}
+        <section className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* Section Header */}
+          <button
+            onClick={() => toggleSection('body')}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                <span className="text-xl">⚖️</span>
               </div>
-              <div className="text-5xl transform scale-125">{getBMIEmoji()}</div>
+              <div className="text-left">
+                <h2 className="text-lg font-semibold text-gray-800">น้ำหนักและส่วนสูง</h2>
+                <p className="text-sm text-gray-500">(ไม่บังคับ)</p>
+              </div>
             </div>
+            <ChevronIcon expanded={expandedSections.body} />
+          </button>
 
-            <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-3 border border-white/50">
-              <div className="flex items-center justify-between">
+          {/* Expanded Content */}
+          {expandedSections.body && (
+            <div className="px-5 pb-5 space-y-4">
+              {/* Saved Data Indicator */}
+              {(weight || height) && (
+                <div className="flex items-start gap-2 bg-rose-50 rounded-xl p-3">
+                  <PinIcon />
+                  <p className="text-sm text-rose-600">
+                    ข้อมูลที่บันทึกไว้: น้ำหนัก <span className="font-bold">{weight || '-'} kg</span> | ส่วนสูง <span className="font-bold">{height || '-'} cm</span> | BMI <span className="font-bold">{calculateBMI()}</span>
+                  </p>
+                </div>
+              )}
+
+              {/* Weight & Height Inputs */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Weight Input */}
                 <div>
-                  <p className={`text-lg font-bold ${getBMIColor().text} mb-1`}>{getBMIStatus()}</p>
-                  <p className="text-sm text-slate-600 leading-relaxed">{getBMITip()}</p>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">น้ำหนักปัจจุบัน</label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      value={weight}
+                      onChange={(e) => handleWeightChange(e.target.value)}
+                      className="w-full px-4 py-3 text-xl font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                      placeholder="0"
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">kg</span>
+                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </section>
 
-        {/* Weight & Height */}
-        <section className="space-y-4">
-          {/* Weight Card - Always shown */}
-          <div className="bg-white rounded-3xl p-5 shadow-lg border border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-lg font-semibold text-slate-700">น้ำหนัก</p>
-              <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">กก.</span>
-            </div>
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => adjustWeight(-0.5)}
-                className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
-              >
-                −
-              </button>
-              <div className="flex-1">
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  value={weight}
-                  onChange={(e) => handleWeightChange(e.target.value)}
-                  className="w-full text-center text-4xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
-                  placeholder="0.0"
-                />
-              </div>
-              <button
-                onClick={() => adjustWeight(0.5)}
-                className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
-              >
-                +
-              </button>
-            </div>
-          </div>
-
-          {/* Height Card - Collapsible for returning users, normal for new users */}
-          {height ? (
-            <details className="bg-white rounded-3xl shadow-lg border border-slate-100 group">
-              <summary className="p-4 cursor-pointer hover:bg-slate-50 rounded-3xl transition-colors">
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-semibold text-slate-700">ส่วนสูง</p>
-                  <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">ซม.</span>
-                </div>
-              </summary>
-              <div className="px-4 pb-4">
-                <div className="flex items-center justify-center gap-3 pt-2">
-                  <button
-                    onClick={() => adjustHeight(-1)}
-                    className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
-                  >
-                    −
-                  </button>
-                  <div className="flex-1">
+                {/* Height Input */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-600 mb-2">ส่วนสูงปัจจุบัน</label>
+                  <div className="relative">
                     <input
                       type="text"
                       inputMode="numeric"
                       value={height}
                       onChange={(e) => handleHeightChange(e.target.value)}
-                      className="w-full text-center text-4xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
+                      className="w-full px-4 py-3 text-xl font-semibold text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
                       placeholder="0"
                       maxLength={3}
                     />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm">cm</span>
                   </div>
-                  <button
-                    onClick={() => adjustHeight(1)}
-                    className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
-                  >
-                    +
-                  </button>
                 </div>
               </div>
-            </details>
-          ) : (
-            <div className="bg-white rounded-3xl p-5 shadow-lg border border-slate-100">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-lg font-semibold text-slate-700">ส่วนสูง</p>
-                <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">ซม.</span>
+
+              {/* BMI Display Card */}
+              <div className={`${getBMIColor().bg} rounded-xl p-4`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-1">BMI ปัจจุบัน</p>
+                    <p className={`text-3xl font-bold ${getBMIColor().text}`}>
+                      {calculateBMI()} <span className="text-sm font-normal text-gray-500">kg/m²</span>
+                    </p>
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${getBMIColor().badge}`}>
+                    {getBMIStatus() || '-'}
+                  </span>
+                </div>
+                {getBMITip() && (
+                  <p className="text-sm text-gray-600 mt-3 pt-3 border-t border-gray-200/50">
+                    {getBMITip()}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center justify-center gap-3">
+            </div>
+          )}
+        </section>
+
+        {/* Health Habits Section */}
+        <section className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* Section Header */}
+          <button
+            onClick={() => toggleSection('habits')}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-rose-100 rounded-full flex items-center justify-center">
+                <span className="text-xl">📋</span>
+              </div>
+              <div className="text-left">
+                <h2 className="text-lg font-semibold text-gray-800">เมื่อวานทำอะไรบ้าง?</h2>
+                <p className="text-sm text-gray-500">ข้อไหนไม่มีข้ามได้เลย</p>
+              </div>
+            </div>
+            <ChevronIcon expanded={expandedSections.habits} />
+          </button>
+
+          {/* Expanded Content */}
+          {expandedSections.habits && (
+            <div className="px-5 pb-5 space-y-3">
+              {/* Selected Count */}
+              {(riskFactors.length > 0 || positiveHabits.length > 0) && (
+                <div className="flex items-start gap-2 bg-orange-50 rounded-xl p-3">
+                  <PinIcon />
+                  <p className="text-sm text-orange-700">
+                    เลือกไว้แล้ว <span className="font-bold">{riskFactors.length + positiveHabits.length}</span> ข้อ
+                  </p>
+                </div>
+              )}
+
+              {/* Risk Factors */}
+              <div className="space-y-2">
+                {riskOptions.map(option => {
+                  const isSelected = riskFactors.includes(option.id);
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => toggleRiskFactor(option.id)}
+                      className={`w-full p-4 rounded-xl text-left transition-all border-2 ${isSelected
+                        ? 'bg-rose-500 border-rose-500 text-white shadow-md'
+                        : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{option.icon}</span>
+                        <div className="flex-1">
+                          <p className="text-base font-semibold leading-tight">{option.label}</p>
+                          {option.description && (
+                            <p className={`text-xs mt-1 leading-relaxed ${isSelected ? 'text-rose-100' : 'text-gray-500'}`}>
+                              {option.description}
+                            </p>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-gray-100 my-3"></div>
+
+              {/* Positive Habits */}
+              <div className="space-y-2">
+                {positiveOptions.map(option => {
+                  const isSelected = positiveHabits.includes(option.id);
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => togglePositiveHabit(option.id)}
+                      className={`w-full p-4 rounded-xl text-left transition-all border-2 ${isSelected
+                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-md'
+                        : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{option.icon}</span>
+                        <div className="flex-1">
+                          <p className="text-base font-semibold leading-tight">{option.label}</p>
+                          {option.description && (
+                            <p className={`text-xs mt-1 leading-relaxed ${isSelected ? 'text-emerald-100' : 'text-gray-500'}`}>
+                              {option.description}
+                            </p>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* Exercise Section */}
+        <section className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* Section Header */}
+          <button
+            onClick={() => toggleSection('exercise')}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                <span className="text-xl">🏃‍♂️</span>
+              </div>
+              <div className="text-left">
+                <h2 className="text-lg font-semibold text-gray-800">ออกกำลังกาย</h2>
+                <p className="text-sm text-gray-500">เดินเร็ว วิ่ง ขี่จักรยาน ว่ายน้ำ</p>
+              </div>
+            </div>
+            <ChevronIcon expanded={expandedSections.exercise} />
+          </button>
+
+          {/* Expanded Content */}
+          {expandedSections.exercise && (
+            <div className="px-5 pb-5 space-y-3">
+              {/* Selected Indicator */}
+              {exerciseDuration && (
+                <div className="flex items-start gap-2 bg-blue-50 rounded-xl p-3">
+                  <PinIcon />
+                  <p className="text-sm text-blue-700">
+                    เลือกไว้: <span className="font-bold">{exerciseDuration === 'lessThan30' ? 'น้อยกว่า 30 นาที' : '30 นาทีขึ้นไป'}</span>
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => adjustHeight(-1)}
-                  className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
+                  onClick={() => toggleExerciseDuration('lessThan30')}
+                  className={`p-4 rounded-xl text-center transition-all border-2 ${exerciseDuration === 'lessThan30'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                    : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
+                    }`}
                 >
-                  −
+                  <span className="text-lg font-bold">น้อยกว่า 30 นาที</span>
                 </button>
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    value={height}
-                    onChange={(e) => handleHeightChange(e.target.value)}
-                    className="w-full text-center text-4xl font-bold text-slate-800 bg-transparent border-0 focus:outline-none focus:ring-0"
-                    placeholder="0"
-                    maxLength={3}
-                  />
-                </div>
                 <button
-                  onClick={() => adjustHeight(1)}
-                  className="w-14 h-14 bg-slate-100 hover:bg-slate-200 active:bg-slate-300 text-slate-700 rounded-2xl text-2xl font-semibold transition-all flex items-center justify-center"
+                  onClick={() => toggleExerciseDuration('moreThan30')}
+                  className={`p-4 rounded-xl text-center transition-all border-2 ${exerciseDuration === 'moreThan30'
+                    ? 'bg-orange-500 border-orange-500 text-white shadow-md'
+                    : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
+                    }`}
                 >
-                  +
+                  <span className="text-lg font-bold">30 นาทีขึ้นไป</span>
                 </button>
               </div>
             </div>
           )}
         </section>
 
-        {/* Health Habits */}
-        <section className="bg-white rounded-3xl p-5 shadow-lg border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-2">เมื่อวานทำอะไรบ้าง?</h2>
-          <p className="text-sm text-slate-500 mb-4">ข้อไหนไม่มีข้ามได้เลยฮะ</p>
+        {/* Symptoms Section */}
+        <section className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          {/* Section Header */}
+          <button
+            onClick={() => toggleSection('symptoms')}
+            className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <span className="text-xl">🩺</span>
+              </div>
+              <div className="text-left">
+                <h2 className="text-lg font-semibold text-gray-800">อาการผิดปกติวันนี้</h2>
+                <p className="text-sm text-gray-500">(ไม่มีข้ามได้)</p>
+              </div>
+            </div>
+            <ChevronIcon expanded={expandedSections.symptoms} />
+          </button>
 
-          <div className="space-y-3">
-            {/* Risk Factors */}
-            <div className="grid grid-cols-1 gap-3">
-              {riskOptions.map(option => {
-                const isSelected = riskFactors.includes(option.id);
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => toggleRiskFactor(option.id)}
-                    className={`p-4 rounded-2xl text-left transition-all border-2 ${
-                      isSelected
-                        ? 'bg-rose-500 border-rose-600 text-white shadow-md'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{option.icon}</span>
-                      <div className="flex-1">
-                        <p className="text-base font-semibold leading-tight mb-1">{option.label}</p>
-                        {option.description && (
-                          <p className={`text-xs leading-relaxed ${isSelected ? 'text-rose-100' : 'text-slate-500'}`}>
-                            {option.description}
-                          </p>
+          {/* Expanded Content */}
+          {expandedSections.symptoms && (
+            <div className="px-5 pb-5 space-y-3">
+              {/* Selected Indicator */}
+              {symptoms.length > 0 && (
+                <div className="flex items-start gap-2 bg-red-50 rounded-xl p-3">
+                  <PinIcon />
+                  <p className="text-sm text-red-700">
+                    เลือกไว้แล้ว <span className="font-bold">{symptoms.length}</span> อาการ
+                  </p>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {symptomOptions.map(option => {
+                  const isSelected = symptoms.includes(option.id);
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => toggleSymptom(option.id)}
+                      className={`w-full p-4 rounded-xl text-left transition-all border-2 ${isSelected
+                          ? 'bg-red-500 border-red-500 text-white shadow-md'
+                          : 'bg-gray-50 border-gray-100 text-gray-700 hover:border-gray-200'
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{option.icon}</span>
+                        <div className="flex-1">
+                          <p className="text-base font-semibold leading-tight">{option.label}</p>
+                          {option.description && (
+                            <p className={`text-xs mt-1 leading-relaxed ${isSelected ? 'text-red-100' : 'text-gray-500'}`}>
+                              {option.description}
+                            </p>
+                          )}
+                        </div>
+                        {isSelected && (
+                          <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
                         )}
                       </div>
-                    </div>
-                  </button>
-                );
-              })}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-
-            {/* Positive Habits */}
-            <div className="grid grid-cols-1 gap-3 pt-3 border-t border-slate-100">
-              {positiveOptions.map(option => {
-                const isSelected = positiveHabits.includes(option.id);
-                return (
-                  <button
-                    key={option.id}
-                    onClick={() => togglePositiveHabit(option.id)}
-                    className={`p-4 rounded-2xl text-left transition-all border-2 ${
-                      isSelected
-                        ? 'bg-emerald-500 border-emerald-600 text-white shadow-md'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl">{option.icon}</span>
-                      <div className="flex-1">
-                        <p className="text-base font-semibold leading-tight mb-1">{option.label}</p>
-                        {option.description && (
-                          <p className={`text-xs leading-relaxed ${isSelected ? 'text-emerald-100' : 'text-slate-500'}`}>
-                            {option.description}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* Exercise */}
-        <section className="bg-white rounded-3xl p-5 shadow-lg border border-slate-100">
-          <h2 className="text-xl font-bold text-slate-800 mb-2 flex items-center gap-2">
-            <span className="text-2xl">🏃‍♂️</span>
-            ออกกำลังกาย
-          </h2>
-          <p className="text-sm text-slate-500 mb-4">เช่น เดินเร็ว วิ่งเหยาะ ขี่จักรยาน เต้นแอโรบิค ว่ายน้ำ เป็นต้น</p>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => toggleExerciseDuration('lessThan30')}
-              className={`p-4 rounded-2xl text-center transition-all border-2 ${
-                exerciseDuration === 'lessThan30'
-                  ? 'bg-orange-500 border-orange-600 text-white shadow-md'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <span className="text-lg font-bold">น้อยกว่า 30 นาที</span>
-            </button>
-            <button
-              onClick={() => toggleExerciseDuration('moreThan30')}
-              className={`p-4 rounded-2xl text-center transition-all border-2 ${
-                exerciseDuration === 'moreThan30'
-                  ? 'bg-orange-500 border-orange-600 text-white shadow-md'
-                  : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
-              }`}
-            >
-              <span className="text-lg font-bold">30 นาทีขึ้นไป</span>
-            </button>
-          </div>
+          )}
         </section>
       </main>
 
       {/* Floating Action Button */}
       <footer className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-white via-white to-transparent">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-lg mx-auto">
           <button
             onClick={handleSave}
             disabled={isSubmitting}
-            className={`w-full py-5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] text-white text-2xl font-bold rounded-2xl shadow-2xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3 ${
-              isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
-            }`}
+            className={`w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 active:scale-[0.98] text-white text-xl font-bold rounded-2xl shadow-xl shadow-orange-500/30 transition-all flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+              }`}
           >
             {isSubmitting ? (
               <>
