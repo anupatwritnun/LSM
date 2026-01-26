@@ -669,7 +669,7 @@ const YesterdayHealthDiary = () => {
                 <span className="text-xl">🩺</span>
               </div>
               <div className="text-left">
-                <h2 className="text-lg font-semibold text-gray-800">อาการผิดปกติวันนี้</h2>
+                <h2 className="text-lg font-semibold text-gray-800">อาการผิดปกติ</h2>
                 <p className="text-sm text-gray-500">(ไม่มีข้ามได้)</p>
               </div>
             </div>
